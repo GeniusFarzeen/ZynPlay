@@ -1,0 +1,21 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #202020;
+}
+
+#gameCanvas {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  background: linear-gradient(to top, #3a3a3a 70%, #87ceeb);
+}
+
+#score {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  color: white;
+  font-family: "Poppins", sans-serif;
+  font-size: 24px;
+}
