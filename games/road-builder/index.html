@@ -4,13 +4,96 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Road Builder | ZynPlay</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #87ceeb;
+      font-family: sans-serif;
+    }
+    canvas {
+      display: block;
+      background: #87ceeb;
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      color: black;
+      font-size: 24px;
+    }
+  </style>
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
-  <h2 id="score">0</h2>
+  <div id="score">0</div>
 
-  <!-- Load script at the end to ensure DOM is ready -->
-  <script src="script.js"></script>
+  <script>
+    // Wait until everything is loaded
+    window.onload = function() {
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // Set fixed canvas size (works reliably)
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // Car and road setup
+      let car = { x: 100, y: canvas.height/2, width: 40, height: 20 };
+      let road = [{ x: car.x - 50, y: car.y + 5, width: 50, height: 20 }];
+      let score = 0;
+      let gameOver = false;
+
+      // Draw car
+      function drawCar() {
+        ctx.fillStyle = "red";
+        ctx.fillRect(car.x - car.width/2, car.y - car.height/2, car.width, car.height);
+      }
+
+      // Draw road
+      function drawRoad() {
+        ctx.fillStyle = "#444";
+        for (let tile of road) {
+          ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
+        }
+      }
+
+      // Game loop
+      function update() {
+        if (gameOver) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawRoad();
+        drawCar();
+
+        car.x += 2;
+        score++;
+        document.getElementById("score").innerText = score;
+
+        const onRoad = road.some(tile =>
+          car.x + car.width/2 > tile.x &&
+          car.x - car.width/2 < tile.x + tile.width &&
+          car.y + car.height/2 > tile.y &&
+          car.y - car.height/2 < tile.y + tile.height
+        );
+
+        if (!onRoad) {
+          gameOver = true;
+          alert("Game Over! Score: " + score);
+        }
+
+        requestAnimationFrame(update);
+      }
+
+      // Click to add road
+      window.addEventListener("click", () => {
+        if (!gameOver) {
+          road.push({ x: car.x + 50, y: car.y + 5, width: 50, height: 20 });
+        }
+      });
+
+      update();
+    };
+  </script>
 </body>
 </html>
