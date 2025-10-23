@@ -8,38 +8,56 @@
   body { margin:0; overflow:hidden; background:#87ceeb; font-family:sans-serif; }
   canvas { display:block; }
   #score { position:absolute; top:10px; left:10px; font-size:24px; color:black; }
+  #playAgain {
+    display:none;
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%, -50%);
+    padding: 15px 30px;
+    font-size: 24px;
+    background:#444;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+  }
 </style>
 </head>
 <body>
 <canvas id="gameCanvas"></canvas>
 <div id="score">0</div>
+<button id="playAgain">Play Again</button>
 
 <script>
 window.onload = function() {
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
+  const playBtn = document.getElementById("playAgain");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  // Car setup
-  let car = { x: 100, y: canvas.height/2, width: 50, height: 30, color: "red" };
-  let road = [{ x: 75, y: car.y + 10, width: 150, height: 20 }]; // starting road
-  let score = 0;
-  let gameOver = false;
+  let carImg = new Image();
+  carImg.src = "car.png"; // car image file in same folder
+
+  let car, road, score, gameOver, cameraX;
+
+  function initGame() {
+    car = { x: 150, y: canvas.height/2, width: 60, height: 30 }; // match image size
+    road = [{ x: 100, y: car.y + 10, width: 150, height: 20 }];
+    score = 0;
+    gameOver = false;
+    cameraX = 0;
+    playBtn.style.display = "none";
+  }
 
   function drawCar() {
-    ctx.fillStyle = car.color;
-    ctx.fillRect(car.x - car.width/2, car.y - car.height/2, car.width, car.height);
-    // small wheels
-    ctx.fillStyle = "black";
-    ctx.fillRect(car.x - car.width/2 + 5, car.y + car.height/2 - 5, 10, 5);
-    ctx.fillRect(car.x + car.width/2 - 15, car.y + car.height/2 - 5, 10, 5);
+    ctx.drawImage(carImg, car.x, car.y - car.height/2, car.width, car.height);
   }
 
   function drawRoad() {
     ctx.fillStyle = "#444";
     for(let tile of road) {
-      ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
+      ctx.fillRect(tile.x - cameraX, tile.y, tile.width, tile.height);
     }
   }
 
@@ -50,11 +68,12 @@ window.onload = function() {
     drawRoad();
     drawCar();
 
-    car.x += 2; // smooth forward movement
+    car.x += 2; // move forward
+    cameraX = car.x - 150; // camera follows car
+
     score++;
     document.getElementById("score").innerText = score;
 
-    // check if car is on any road tile
     const onRoad = road.some(tile =>
       car.x + car.width/2 > tile.x &&
       car.x - car.width/2 < tile.x + tile.width &&
@@ -64,21 +83,28 @@ window.onload = function() {
 
     if(!onRoad) {
       gameOver = true;
-      alert("Game Over! Score: " + score);
+      playBtn.style.display = "block";
     }
 
     requestAnimationFrame(update);
   }
 
-  // click to build road
   window.addEventListener("click", () => {
     if(!gameOver) {
-      // new road tile slightly ahead of car
-      road.push({ x: car.x + 30, y: car.y + 10, width: 150, height: 20 });
+      road.push({ x: car.x + 60, y: car.y + 10, width: 150, height: 20 });
     }
   });
 
-  update();
+  playBtn.addEventListener("click", () => {
+    initGame();
+    update();
+  });
+
+  initGame();
+  // ensure car image loads before starting
+  carImg.onload = function() {
+    update();
+  };
 };
 </script>
 </body>
