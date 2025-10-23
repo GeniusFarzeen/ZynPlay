@@ -3,14 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Road Builder Test</title>
+  <title>Road Builder | ZynPlay</title>
   <style>
-    body { margin:0; overflow:hidden; }
-    canvas { display:block; background:#87ceeb; }
+    body { margin:0; overflow:hidden; background:#87ceeb; font-family:sans-serif; }
+    canvas { display:block; }
+    #score { position:absolute; top:10px; left:10px; color:black; font-size:24px; }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
+  <div id="score">0</div>
+
   <script>
     window.onload = function() {
       const canvas = document.getElementById("gameCanvas");
@@ -18,10 +21,58 @@
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
 
-      // Draw a simple red square in the middle
-      ctx.fillStyle = "red";
-      ctx.fillRect(canvas.width/2 - 25, canvas.height/2 - 25, 50, 50);
-    };
+      // Car setup
+      let car = { x: 100, y: canvas.height/2, width: 40, height: 20 };
+      let road = [{ x: car.x - 50, y: car.y + 5, width: 50, height: 20 }];
+      let score = 0;
+      let gameOver = false;
+
+      function drawCar() {
+        ctx.fillStyle = "red";
+        ctx.fillRect(car.x - car.width/2, car.y - car.height/2, car.width, car.height);
+      }
+
+      function drawRoad() {
+        ctx.fillStyle = "#444";
+        for (let tile of road) {
+          ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
+        }
+      }
+
+      function update() {
+        if(gameOver) return;
+
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        drawRoad();
+        drawCar();
+
+        car.x += 2;
+        score++;
+        document.getElementById("score").innerText = score;
+
+        const onRoad = road.some(tile =>
+          car.x + car.width/2 > tile.x &&
+          car.x - car.width/2 < tile.x + tile.width &&
+          car.y + car.height/2 > tile.y &&
+          car.y - car.height/2 < tile.y + tile.height
+        );
+
+        if(!onRoad) {
+          gameOver = true;
+          alert("Game Over! Score: " + score);
+        }
+
+        requestAnimationFrame(update);
+      }
+
+      window.addEventListener("click", () => {
+        if(!gameOver) {
+          road.push({ x: car.x + 50, y: car.y + 5, width: 50, height: 20 });
+        }
+      });
+
+      update();
+    }
   </script>
 </body>
 </html>
