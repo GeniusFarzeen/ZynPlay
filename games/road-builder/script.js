@@ -4,26 +4,29 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let car = { x: 100, y: canvas.height / 2, width: 40, height: 20 };
+let car = { x: 100, y: canvas.height/2, width: 40, height: 20 };
 let road = [];
-let gameOver = false;
 let score = 0;
+let gameOver = false;
 
-// Draw car
+// Initial road under the car
+road.push({ x: car.x - 50, y: car.y + 5, width: 50, height: 20 });
+
+// Draw the car
 function drawCar() {
   ctx.fillStyle = "red";
   ctx.fillRect(car.x - car.width/2, car.y - car.height/2, car.width, car.height);
 }
 
-// Draw road
+// Draw the road
 function drawRoad() {
   ctx.fillStyle = "#444";
   for (let tile of road) {
-    ctx.fillRect(tile.x, tile.y, 50, 20);
+    ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
   }
 }
 
-// Game loop
+// Update game
 function update() {
   if (gameOver) return;
 
@@ -38,9 +41,9 @@ function update() {
   // check if car is on road
   const onRoad = road.some(tile =>
     car.x + car.width/2 > tile.x &&
-    car.x - car.width/2 < tile.x + 50 &&
+    car.x - car.width/2 < tile.x + tile.width &&
     car.y + car.height/2 > tile.y &&
-    car.y - car.height/2 < tile.y + 20
+    car.y - car.height/2 < tile.y + tile.height
   );
 
   if (!onRoad) {
@@ -51,10 +54,10 @@ function update() {
   requestAnimationFrame(update);
 }
 
-// Tap/click to build road
+// Tap/click to add road
 window.addEventListener("click", () => {
   if (!gameOver) {
-    road.push({ x: car.x + 50, y: car.y + 5 });
+    road.push({ x: car.x + 50, y: car.y + 5, width: 50, height: 20 });
   }
 });
 
